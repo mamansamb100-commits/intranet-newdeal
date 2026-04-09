@@ -22,8 +22,11 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
-      - name: Run git-secrets scan
-uses: trufflesecurity/trufflehog-action@v1
+      - name: Run secrets scan
+        uses: trufflesecurity/trufflehog-action@v1
+        with:
+          path: .
+          extra_args: --no-verification --only-verified
 
   push:
     needs: build
