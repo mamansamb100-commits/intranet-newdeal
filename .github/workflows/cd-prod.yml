@@ -1,0 +1,28 @@
+name: CD Prod
+
+on:
+  push:
+    branches: [prod]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan critical vulns
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'maman10/intranet-newdeal:dev'
+          exit-code: '1'
+          severity: 'CRITICAL'
+
+  deploy:
+    needs: scan
+    runs-on: runner_prod
+    steps:
+      - name: Deploy
+        run: |
+          docker pull maman10/intranet-newdeal:latest
+          docker stop intranet || true
+          docker rm intranet || true
+          docker run -d --name intranet -p 80:80 maman10/intranet-newdeal:latest
